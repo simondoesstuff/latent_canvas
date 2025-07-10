@@ -165,7 +165,7 @@ All actions have a similar path through the state machine because they all incur
 
 The share URL feature does not have an associated event because there is no explicit trigger. The URL sharing functionality is entirely automatic -- the URL updates as the state updates and the state updates as the URL updates.
 ## UI Mocks
-![mock](./mock.png)
+![mock](https://github.com/simondoesstuff/latent_canvas/blob/d7170b94a040bcadc30b05dcfb82d684ec2715bc/md/mock.png)
 ## Class Diagram
 ```mermaid
 classDiagram

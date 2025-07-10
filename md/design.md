@@ -165,7 +165,7 @@ stateDiagram-v2
 ## UI Mocks
 
 There are a few different UI mocks, here:
-[mock](./latent canvas.png)
+[mock](md/mock.png)
 ## Class Diagram
 ```mermaid
 classDiagram

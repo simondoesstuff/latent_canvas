@@ -162,6 +162,8 @@ stateDiagram-v2
 	UI.onReset --> confirmReset?
 	confirmReset? --> updateStack : yes? clear stack
 ```
+## UI Mocks
+[basic mock](./basic_mock.png)
 ## Class Diagram
 ```mermaid
 classDiagram

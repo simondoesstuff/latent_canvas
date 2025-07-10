@@ -1,5 +1,5 @@
 ---
-modified: 2025-07-09T23:33:00-06:00
+modified: 2025-07-10T00:54:29-06:00
 ---
 > Simon Walker
 > July 9th, 2025
@@ -58,8 +58,6 @@ These are limitations or restrictions that shape the design and development of t
 - **Stateless Persistence:** The application will not use a database or user accounts. The only method for saving and sharing a drawing is via URL encoding.
 - **Single-User Focus:** The interaction model is designed for a single user. Collaboration is limited to the asynchronous sharing of canvas states via URLs.
 ## Users and Tasks
-TODO
-
 ### **Latent Canvas: User and Task Analysis**
 ### **1. User Personas**
 Two primary types of users are anticipated.
@@ -76,15 +74,12 @@ The following use cases detail the core interactions a user will have with the s
     1. The user arrives at the Latent Canvas web page.
     2. The system presents a blank 16x16 grid.
     3. The user clicks or drags their mouse over the grid cells.
-    4. Each clicked cell toggles from "off" (black) to "on" (white).
+    4. Each clicked cell lights up as if painted
     5. After each new cell is activated, the system's AI model processes the current grid state.
     6. The system displays the AI's prediction for the user's _next_ move as a "ghost" image (a semi-transparent gray cell) on the grid.
     7. The user can continue clicking cells to build their drawing, with the ghost prediction updating continuously.
 - **Alternative Flows & Exceptions (WAVE):**
-    - **(What-if) What if the user wants to erase a cell?** The user can click an "on" cell again to toggle it back to "off". The AI model will update its prediction accordingly.
-    - **(Alternative) The user is on a touch device.** The user can tap or drag their finger on the grid to activate cells.
-    - **(Various) The AI model is slow to respond.** The ghost prediction may lag slightly behind the user's drawing action. The UI should feel responsive, even if the prediction takes a moment to appear.
-    - **(Exceptional) The AI model fails to generate a prediction.** If the underlying model encounters an error, the ghost prediction will simply not appear. The user can continue to draw without interruption. The system should handle this gracefully without crashing.
+    - **(Various) The AI model is slow to respond.** The ghost prediction may lag slightly behind the user's drawing action. The UI should feel responsive, even if the prediction takes a moment to appear. A loading indicator may be necessary depending on performance.
 #### **Use Case 2: Undo the Last Action**
 - **Actor(s):** All User Personas
 - **Description:** The user reverses their most recent drawing action (toggling a cell on or off).
@@ -117,13 +112,14 @@ The following use cases detail the core interactions a user will have with the s
     1. The user has created a drawing they wish to share.
     2. The system encodes the current state of the grid (the sequence of "on" cells) into a URL parameter.
     3. The browser's URL is updated with this new parameter.
-    4. The user copies the URL -- to be shared with another user.
+    4. The user copies the URL, to be shared with another user.
 - **Alternative Flows & Exceptions (WAVE):**
     - **(What-if) Another user opens a shared URL?** When a user navigates to a URL containing the drawing data, the system parses the URL, decodes the grid state, and immediately displays the shared drawing on the canvas upon page load. The AI then generates its prediction based on this loaded pattern.
     - **(Exceptional) The shared URL is malformed or invalid.** If the system cannot parse the data from the URL, it will default to loading a blank canvas and ignore the invalid data. It will not crash.
 ## Storage
 This app is entirely hosted in the browser and requires no persistent state in local storage or on the user's host machine -- everything in memory. However, to enable **URL Sharing** between users, most of the system state is serialized into a dense form, URL encoded, and packed into the URL flags. This lets the URL (visible to the user) mirror the source of truth (in memory).
 
+The state encoded into the URL is parsed immediately upon first visiting the site and is used to populate nearly all of the internal state (to initialize the `MasterState`) using the momento pattern (a deserialization step).
 ### URL State Schema
 **(JSON)** encoded into a web-safe form:
 - model_id: int
@@ -162,6 +158,12 @@ stateDiagram-v2
 	UI.onReset --> confirmReset?
 	confirmReset? --> updateStack : yes? clear stack
 ```
+
+The four primary functions (draw, undo, reset, shareURL) have an implementation that is traceable starting from the states on the second layer (from the top of the diagram). Namely: `parseUrlState`, `UI.onDraw`, `UI.onUndo`, and `UI.onReset`/`confirmReset`.
+
+All actions have a similar path through the state machine because they all incur updates to the internal "draw stack" which will cause a series of dependent values to update.
+
+The share URL feature does not have an associated event because there is no explicit trigger. The URL sharing functionality is entirely automatic -- the URL updates as the state updates and the state updates as the URL updates.
 ## UI Mocks
 
 There are a few different UI mocks, here:
@@ -231,6 +233,8 @@ The overall system implements a MVC architecture where Svelte is entirely respon
 As the UI receives actions from the user's, simple commands are handled by the underlying system. The UI does not directly mutate the core state.
 
 The underlying ONNX based ML model requires specialized tensor datatypes as a parameter and produces tokens as an output. To make this compatible with the rest of the state and renderable by the UI, an adapter permanently wraps the ONNX model.
+
+The URL sharing functionality requires serialization and deserialization of the private state of the `MasterState`. To maintain encapsulation, the momento pattern is used in the sense that the momento is the serialized String representation of the `MasterState`.
 ## Sequence Diagrams
 ### Deployment
 The machine learning model complicates deployment with an extra compilation step.

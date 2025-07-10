@@ -163,7 +163,9 @@ stateDiagram-v2
 	confirmReset? --> updateStack : yes? clear stack
 ```
 ## UI Mocks
-[basic mock](./basic_mock.png)
+
+There are a few different UI mocks, here:
+[mock](./latent canvas.png)
 ## Class Diagram
 ```mermaid
 classDiagram

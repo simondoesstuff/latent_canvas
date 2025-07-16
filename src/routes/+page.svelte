@@ -1,12 +1,24 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import Grid from './Grid.svelte';
 
-<article class="prose">
-	<h1>Heading 1</h1>
-	<p>This is a paragraph of text with some <strong>bold</strong> and <em>italic</em> content.</p>
-	<ul>
-		<li>List item 1</li>
-		<li>List item 2</li>
-	</ul>
-	<pre><code>console.log('Hello, Tailwind 4!');</code></pre>
-</article>
+	const state: boolean[][] = $state([]);
+
+	for (let y = 0; y < 16; y++) {
+		let row: boolean[] = [];
+
+		for (let x = 0; x < 16; x++) {
+			const v = Math.random() > 0.8;
+			row.push(v);
+		}
+
+		state.push(row);
+	}
+
+	function onDraw(x: number, y: number) {
+		state[y][x] = true;
+	}
+</script>
+
+<div class="container mx-auto grid h-dvh w-dvw place-items-center p-4">
+	<Grid {state} ondraw={onDraw} />
+</div>

@@ -1,4 +1,16 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+@theme {
+  --color-bg: #020202;
+  --color-bg-2: #182224;
+  --color-fg: #E7FFF0;
+  --color-primary: #16DB65;
+  --color-primary-2: #058C42;
+  --color-primary-3: #04471C;
+  --color-primary-4: #0D2818;
+}
 
+html {
+  @apply bg-bg text-fg;
+}

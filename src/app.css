@@ -11,6 +11,25 @@
   --color-primary-4: #0D2818;
 }
 
+@layer utilities {
+  .big {
+    @apply w-full h-full;
+  }
+
+  .biggest {
+    @apply w-dvw h-dvh;
+  }
+
+  .grid-center {
+    @apply grid place-items-center;
+  }
+}
+
 html {
-  @apply bg-bg text-fg;
+  @apply text-fg;
+}
+
+html {
+  @apply bg-bg;
+  scrollbar-color: var(--color-bg);
 }

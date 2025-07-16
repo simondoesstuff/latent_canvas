@@ -35,7 +35,7 @@
 						onmousedown={() => onMouseDown(x, y)}
 						onmouseenter={() => onMouseEnter(x, y)}
 						in:fade={{ duration: 150 }}
-						class="hover:bg-primary border-bg aspect-square w-8 border-[0.15rem] hover:scale-125 hover:border-0 hover:brightness-115"
+						class="hover:bg-primary border-bg aspect-square w-8 cursor-pointer border-[0.15rem] hover:scale-125 hover:border-0 hover:brightness-115"
 					></button>
 				{/key}
 			{/each}

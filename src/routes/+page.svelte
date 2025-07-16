@@ -1,12 +1,18 @@
 <script lang="ts">
+	import Close from '$lib/icons/Close.svelte';
 	import Grid from './Grid.svelte';
+	import Trash from '$lib/icons/Trash.svelte';
+	import Undo from '$lib/icons/Undo.svelte';
+	import { cubicOut } from 'svelte/easing';
+	import { scale } from 'svelte/transition';
 
-	const state: boolean[][] = $state([]);
+	let state: boolean[][] = $state([]);
+	const gridDim = [16, 16];
 
-	for (let y = 0; y < 16; y++) {
+	for (let y = 0; y < gridDim[1]; y++) {
 		let row: boolean[] = [];
 
-		for (let x = 0; x < 16; x++) {
+		for (let x = 0; x < gridDim[0]; x++) {
 			const v = Math.random() > 0.8;
 			row.push(v);
 		}
@@ -17,8 +23,74 @@
 	function onDraw(x: number, y: number) {
 		state[y][x] = true;
 	}
+
+	function clearState() {
+		state = state.map((row) => row.map(() => false));
+	}
+
+	let isModalOpen: boolean = $state(false);
+	const openModal = () => (isModalOpen = true);
+	const closeModal = () => (isModalOpen = false);
+
+	const onTrash = openModal;
+	function onUndo() {}
 </script>
 
-<div class="container mx-auto grid h-dvh w-dvw place-items-center p-4">
-	<Grid {state} ondraw={onDraw} />
-</div>
+<!-- Modal -->
+{#if isModalOpen}
+	<div class="big grid-center absolute z-10">
+		<div
+			transition:scale={{ start: 0.7, opacity: 0, duration: 210, easing: cubicOut }}
+			class="bg-bg border-fg grid-center relative z-10 border-2 p-5"
+		>
+			<h1 class="prose-2xl mb-3">Are you sure you want to do that?</h1>
+			<button
+				onclick={() => {
+					clearState();
+					closeModal();
+				}}
+				class="hover:text-bg m-3 rounded bg-red-400 p-5"
+			>
+				Erase the board
+			</button>
+			<button
+				aria-label="close modal"
+				onclick={closeModal}
+				class="bg-fg text-bg absolute top-0 right-0 aspect-square w-6 translate-x-[50%] -translate-y-[50%] rounded-full"
+			>
+				<Close />
+			</button>
+		</div>
+		<div onclick={closeModal} class="big absolute bg-black opacity-60"></div>
+	</div>
+{/if}
+
+<!-- main -->
+<main>
+	<div class="grid-center h-dvh w-dvw">
+		<div
+			class="flex max-md:h-full max-md:flex-col max-md:justify-center md:w-full md:justify-around"
+		>
+			<button onclick={onTrash} class="max-md:hidden"><Trash /></button>
+			<Grid {state} ondraw={onDraw} />
+			<button onclick={onUndo} class="max-md:hidden"><Undo /></button>
+			<!-- max-md: Under buttons -->
+			<div class="my-8 flex w-full justify-center gap-5 md:hidden">
+				<button onclick={onTrash}><Trash /></button>
+				<button onclick={onUndo}><Undo /></button>
+			</div>
+		</div>
+	</div>
+</main>
+
+<style lang="postcss">
+	@reference "../app.css";
+
+	button {
+		@apply cursor-pointer transition-all hover:scale-115 hover:brightness-155 active:scale-90;
+	}
+
+	main button {
+		@apply bg-bg-2 my-auto h-16 min-w-16 rounded-4xl p-2;
+	}
+</style>

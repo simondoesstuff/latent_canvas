@@ -10,8 +10,6 @@
 	const shape: Coord = [16, 16];
 	let state: GridStack = $state(new GridStack(shape));
 
-	$inspect(state);
-
 	// initialize a random grid state
 	for (let y = 0; y < shape[1]; y++) {
 		for (let x = 0; x < shape[0]; x++) {
@@ -45,6 +43,16 @@
 		state.pop();
 	}
 </script>
+
+<!-- CtrlZ Hook -->
+<svelte:window
+	onkeypress={(e) => {
+		if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+			e.preventDefault();
+			onUndo();
+		}
+	}}
+/>
 
 <!-- Modal -->
 {#if isModalOpen}

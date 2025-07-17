@@ -1,7 +1,8 @@
 <script lang="ts">
+	import type { GridStack } from '$lib/gridStack';
 	import { fade } from 'svelte/transition';
 
-	let { state, ondraw }: { state: boolean[][]; ondraw: (x: number, y: number) => void } = $props();
+	let { state, ondraw }: { state: GridStack; ondraw: (x: number, y: number) => void } = $props();
 
 	let drawing = false;
 

@@ -5,35 +5,45 @@
 	import Undo from '$lib/icons/Undo.svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
+	import { GridStack, type Coord } from '$lib/gridStack.svelte.ts';
 
-	let state: boolean[][] = $state([]);
-	const gridDim = [16, 16];
+	const shape: Coord = [16, 16];
+	let state: GridStack = $state(new GridStack(shape));
 
-	for (let y = 0; y < gridDim[1]; y++) {
-		let row: boolean[] = [];
+	$inspect(state);
 
-		for (let x = 0; x < gridDim[0]; x++) {
-			const v = Math.random() > 0.8;
-			row.push(v);
+	// initialize a random grid state
+	for (let y = 0; y < shape[1]; y++) {
+		for (let x = 0; x < shape[0]; x++) {
+			if (Math.random() > 0.9) {
+				state.push(x, y);
+			}
 		}
-
-		state.push(row);
 	}
 
-	function onDraw(x: number, y: number) {
-		state[y][x] = true;
-	}
-
-	function clearState() {
-		state = state.map((row) => row.map(() => false));
-	}
-
+	// modal local state
 	let isModalOpen: boolean = $state(false);
 	const openModal = () => (isModalOpen = true);
 	const closeModal = () => (isModalOpen = false);
 
-	const onTrash = openModal;
-	function onUndo() {}
+	// callbacks
+
+	function onDraw(x: number, y: number) {
+		if (state.at(x, y)) return;
+		state.push(x, y);
+	}
+
+	function clearState() {
+		state.clear();
+	}
+
+	function onTrash() {
+		openModal();
+	}
+
+	function onUndo() {
+		state.pop();
+	}
 </script>
 
 <!-- Modal -->

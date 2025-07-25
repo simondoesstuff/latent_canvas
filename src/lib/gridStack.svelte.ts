@@ -1,6 +1,14 @@
 import { Momento } from './momento';
 import type { Coord, int } from './utils';
 
+/**
+ * This is primarily a stack of coordinates, but for
+ * efficiency, a grid is simultaneously maintained. The grid
+ * could be computed by merging all coordinates in the stack
+ * into a single grid.
+ *
+ * Implements the Momento pattern.
+ */
 export class GridStack {
 	private _grid: boolean[][] = $state([]);
 	private _diffs: Coord[] = $state([]);

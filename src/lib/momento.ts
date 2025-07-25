@@ -14,11 +14,19 @@ export class Momento {
 		this.diffs = diffs;
 	}
 
+	/**
+	 * Diffs are serialized (into a string form) in subsequent calls.
+	 * This is primarily used to create the Momento from existing objects.
+	 */
 	public static fromDiffs(diffs: Coord[]) {
 		const dense = Momento.serialize(diffs);
 		return new Momento(dense, diffs);
 	}
 
+	/**
+	 * Parses the string to build the Momento
+	 * The string must be in the expected format -- or risk undefined behavior
+	 */
 	public static fromStr(dense: string) {
 		const diffs = Momento.deserialize(dense);
 		return new Momento(dense, diffs);

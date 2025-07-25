@@ -1,3 +1,4 @@
+import type { Model } from './model';
 import { PixelTransformer } from './pixelTransformer';
 import type { Coord, int } from './utils';
 
@@ -5,7 +6,7 @@ import type { Coord, int } from './utils';
  * An adapter layer around the model to make it easier to use.
  * The model itself uses one-hot encoded vectors as IO.
  */
-export class PixelTransformerAdapter {
+export class PixelTransformerAdapter implements Model {
 	private model: PixelTransformer;
 
 	public constructor() {

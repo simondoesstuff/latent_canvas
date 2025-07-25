@@ -3,5 +3,11 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()]
+	plugins: [tailwindcss(), sveltekit()],
+	server: {
+		watch: {
+			// Exclude the node_modules directory from the watcher
+			ignored: ['**/node_modules/**', 'py', 'py/*', '.direnv', '.git']
+		}
+	}
 });

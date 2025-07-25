@@ -22,6 +22,8 @@
           packages = with pkgs; [
             plantuml
             bun
+            nodePackages.vercel
+            nodejs_22
           ];
         };
       }

@@ -42,6 +42,19 @@
 	function onUndo() {
 		state.pop();
 	}
+
+	async function debug() {
+		const response = await fetch('/api/trainer.py', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: '20'
+		});
+
+		const data = await response.json();
+		alert(data.message);
+	}
 </script>
 
 <!-- CtrlZ Hook -->
@@ -98,6 +111,8 @@
 				<button onclick={onUndo}><Undo /></button>
 			</div>
 		</div>
+
+		<button class="" onclick={debug}>debug</button>
 	</div>
 </main>
 

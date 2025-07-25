@@ -1,3 +1,4 @@
+import json
 from http.server import BaseHTTPRequestHandler
 
 
@@ -28,10 +29,10 @@ class handler(BaseHTTPRequestHandler):
         post_data_bytes = self.rfile.read(content_length)
 
         # 3. Decode from bytes to string
-        params = post_data_bytes.decode("utf-8")
+        params = json.loads(post_data_bytes.decode("utf-8"))
 
         # 4. Compute the return
-        result = str(int(params) * 3)
+        result = json.dumps({"v": 30})
 
         # Send the response back to the frontend
         self.send_response(200)

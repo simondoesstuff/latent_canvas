@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/trainer",
+      "destination": "/api/trainer.py"
+    }
+  ]
+}

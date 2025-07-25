@@ -43,18 +43,22 @@
 		state.pop();
 	}
 
-	async function debug() {
-		const response = await fetch('/api/trainer.py', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: '20'
-		});
-
-		const data = await response.json();
-		alert(data.message);
-	}
+	// async function debug() {
+	// 	try {
+	// 		const response = await fetch('/api/trainer', {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Content-Type': 'application/json'
+	// 			},
+	// 			body: JSON.stringify({ a: 20 })
+	// 		});
+	//
+	// 		const data = await response.json();
+	// 		alert(data.message);
+	// 	} catch (e) {
+	// 		console.log(e);
+	// 	}
+	// }
 </script>
 
 <!-- CtrlZ Hook -->
@@ -111,8 +115,6 @@
 				<button onclick={onUndo}><Undo /></button>
 			</div>
 		</div>
-
-		<button class="" onclick={debug}>debug</button>
 	</div>
 </main>
 

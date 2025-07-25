@@ -1,5 +1,4 @@
-export type int = number;
-export type Coord = [int, int];
+import type { Coord, int } from './utils';
 
 export class GridStack {
 	private _grid: boolean[][] = $state([]);
@@ -54,5 +53,9 @@ export class GridStack {
 		for (let y = 0; y < this.shape[1]; y++) {
 			yield [...this._grid[y]];
 		}
+	}
+
+	public getCoordSeq(): Array<Coord> {
+		return [...this._diffs];
 	}
 }

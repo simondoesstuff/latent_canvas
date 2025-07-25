@@ -6,9 +6,12 @@
 	import { cubicOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 	import { GridStack, type Coord } from '$lib/gridStack.svelte.ts';
+	import { PixelTransformerAdapter } from '$lib/pixelTransformerAdapter.ts';
 
 	const shape: Coord = [16, 16];
 	let state: GridStack = $state(new GridStack(shape));
+	let predictions: Coord[] = $state([]);
+	const model = new PixelTransformerAdapter();
 
 	// initialize a random grid state
 	for (let y = 0; y < shape[1]; y++) {
@@ -29,6 +32,7 @@
 	function onDraw(x: number, y: number) {
 		if (state.at(x, y)) return;
 		state.push(x, y);
+		predictions = model.predict(state.getCoordSeq());
 	}
 
 	function clearState() {
@@ -107,7 +111,7 @@
 			class="flex max-md:h-full max-md:flex-col max-md:justify-center md:w-full md:justify-around"
 		>
 			<button onclick={onTrash} class="max-md:hidden"><Trash /></button>
-			<Grid {state} ondraw={onDraw} />
+			<Grid {state} {predictions} ondraw={onDraw} />
 			<button onclick={onUndo} class="max-md:hidden"><Undo /></button>
 			<!-- max-md: Under buttons -->
 			<div class="my-8 flex w-full justify-center gap-5 md:hidden">

@@ -215,23 +215,35 @@ However, after the model was developed in python and during integration hell, AI
 - *BAD:*  due to the nature of the class, I attempted to make my code smoewhat java-esque. In my opinion, this leads to medicore code for this language which has many more possibilities that would appear radical from the java perspective. TS programmers use the prototype pattern in a flexibly-typed way prolifically. Modules are used often and a significant minority of TS developers consider using classes at all to be bad practice in this language.
 ## Demo
 1. First, we visit https://latent-canvas.vercel.app/
-![[Pasted image 20250725032237.png]]
+
+![overview](./demo1.png)
+
 It may look chaotic at first, but...
+
 2. We draw an image by clicking or dragging over the tiles.
-![[Pasted image 20250725032415.png]]
+
+![drawing](./demo2.png)
 The medium colored pixels represent "drawn" pixels. Notice that the brightly colored pixels changed places from the last image. This is because these represent the predictions that the AI system is making as we draw our image. Since the image changed, so did the predictions.
 
 But due extreme issues with wasm-based ML execution libraries, I am disappointed to say that while I did engineer an ML model to predict reasonably, it was not integrated into the system. The brightly colored pixels seen in this image are the result of random. In my experimentation with the intelligent model, it was able to successfully recognize basic structures and continue them.
 
 3. We can clear the grid with the trash can.
-![[Screenshot 2025-07-25 at 3.29.21 AM.png]]
+
+![modal](./demo3.png)
+
 Clicking "Erase the board"...
-![[Screenshot 2025-07-25 at 3.29.54 AM.png]]
+
+![empty](./demo4.png)
+
 It now lacks the recently drawn pixels and the default pixels.
+
 4. If we make a mistake, we can use the undo button. (First, some sample pixels)
-![[Screenshot 2025-07-25 at 3.32.09 AM.png]]
+
+![simple](./demo5.png)
+
 And pressing the undo button one time...
-![[Screenshot 2025-07-25 at 3.32.59 AM.png]]
+
+![undo](./demo6.png)
 5. Simultaneously while we've been updating the grid. The URL has been changing. 
 
 It was: `https://latent-canvas.vercel.app`  
@@ -241,7 +253,7 @@ It is now: `https://latent-canvas.vercel.app/?grid=%255B83%252C85%255D`
 If you visit the second URL on your device, it will look the same as in the photo, but likely with different AI predictions (light green tiles). This is because the changes we make are captured in the URL state (`%255B83%252C85%255D`)
 
 6. Lastly, there is mobile support. The UI will adjust to utilize space reasonably. If we make the screen larger:
-![[Screenshot 2025-07-25 at 3.36.27 AM.png]]
+![mobile](./demo7.png)
 
 When it is small, the buttons go under the canvas.
 

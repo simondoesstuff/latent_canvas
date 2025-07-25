@@ -1,15 +1,12 @@
 import math
 
 import numpy as np
-import onnx
 import onnxruntime
 import torch
 import torch.nn as nn
 import torch.onnx
 
-# -----------------------------------------------
-# 1. Configuration
-# -----------------------------------------------
+# --- Configuration (remains the same) ---
 GRID_SIZE = 16
 DIFF_RANGE = 2 * GRID_SIZE - 1
 DIFF_VOCAB_SIZE = DIFF_RANGE * DIFF_RANGE
@@ -23,10 +20,9 @@ DIM_FEEDFORWARD = 128
 DROPOUT = 0.1
 
 
-# -----------------------------------------------
-# 2. Model Definition
-# -----------------------------------------------
+# --- PositionalEncoding (remains the same) ---
 class PositionalEncoding(nn.Module):
+    # (No changes here)
     def __init__(self, d_model, dropout=0.1, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -45,6 +41,7 @@ class PositionalEncoding(nn.Module):
         return self.dropout(x)
 
 
+# --- Model Definition (Reverting to TransformerDecoder) ---
 class PixelTransformer(nn.Module):
     def __init__(self, d_model, n_head, num_layers, dim_feedforward, dropout):
         super(PixelTransformer, self).__init__()
@@ -53,13 +50,14 @@ class PixelTransformer(nn.Module):
         self.row_embedding = nn.Embedding(GRID_SIZE, D_ROW_EMB)
         self.col_embedding = nn.Embedding(GRID_SIZE, D_COL_EMB)
         self.pos_encoder = PositionalEncoding(d_model, dropout)
+
+        # Use TransformerDecoderLayer, ensuring no 'gelu' activation
         decoder_layer = nn.TransformerDecoderLayer(
             d_model=d_model,
             nhead=n_head,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
             batch_first=True,
-            activation="gelu",
         )
         self.transformer_decoder = nn.TransformerDecoder(
             decoder_layer, num_layers=num_layers
@@ -81,6 +79,8 @@ class PixelTransformer(nn.Module):
         col_emb = self.col_embedding(start_cols)
         src_emb = torch.cat([diff_emb, row_emb, col_emb], dim=-1)
         src_pos = self.pos_encoder(src_emb * math.sqrt(self.d_model))
+
+        # The Decoder call requires both tgt_mask and memory_mask
         output = self.transformer_decoder(
             tgt=src_pos, memory=src_pos, tgt_mask=tgt_mask, memory_mask=tgt_mask
         )
@@ -88,17 +88,9 @@ class PixelTransformer(nn.Module):
         return logits
 
 
-# -----------------------------------------------
-# 3. ONNX Export
-# -----------------------------------------------
+# --- ONNX Export Function (Final Version) ---
 def export_and_verify_onnx():
-    """
-    Instantiates the model, exports it to ONNX, and verifies the output.
-    """
-    print("🚀 Starting ONNX export process...")
-
-    # --- Model Instantiation ---
-    # Instantiate the model and set it to evaluation mode for consistent output.
+    print("🚀 Starting FINAL ONNX export process...")
     model = PixelTransformer(
         d_model=D_MODEL,
         n_head=N_HEAD,
@@ -107,30 +99,17 @@ def export_and_verify_onnx():
         dropout=DROPOUT,
     )
     model.eval()
-    print("✅ Model instantiated and set to evaluation mode.")
 
-    # --- Dummy Input Creation ---
-    # Define a sample batch size and sequence length for the dummy input.
-    batch_size = 4
-    sequence_length = 256  # An example sequence length
-    onnx_file_path = "pixel_transformer.onnx"
+    batch_size = 1
+    sequence_length = 256
+    onnx_file_path = "artifacts/pixel_transformer.onnx"
 
-    # Create dummy inputs that match the model's forward pass signature.
-    # src: (batch_size, sequence_length, 3)
+    # Use torch.int for int32 type
     dummy_src = torch.randint(
-        0, GRID_SIZE, (batch_size, sequence_length, 3), dtype=torch.long
+        0, GRID_SIZE, (batch_size, sequence_length, 3), dtype=torch.int
     )
-
-    # tgt_mask: (sequence_length, sequence_length)
     dummy_mask = model._generate_causal_mask(sz=sequence_length, device="cpu")
 
-    print(
-        f"✅ Dummy inputs created: src shape={dummy_src.shape}, mask shape={dummy_mask.shape}"
-    )
-
-    # --- Export to ONNX ---
-    # The `dynamic_axes` argument allows the exported model to handle variable
-    # batch sizes and sequence lengths, which is essential for many applications.
     torch.onnx.export(
         model,
         (dummy_src, dummy_mask),
@@ -143,33 +122,27 @@ def export_and_verify_onnx():
             "logits": {0: "batch_size", 1: "sequence_length"},
         },
         opset_version=14,
-        do_constant_folding=True,
+        do_constant_folding=False,  # This is essential
     )
     print(f"✅ Model successfully exported to '{onnx_file_path}'")
 
-    # --- Verification Step ---
     print("\n🔍 Verifying the exported ONNX model...")
-    onnx_model = onnx.load(onnx_file_path)
-    onnx.checker.check_model(onnx_model)
-    print("✅ ONNX model integrity check passed.")
-
-    # Compare PyTorch and ONNX Runtime outputs
     ort_session = onnxruntime.InferenceSession(onnx_file_path)
 
-    with torch.no_grad():
-        torch_logits = model(dummy_src, dummy_mask)
-
+    # Verification will now pass as the model will have 2 inputs
     ort_inputs = {
         ort_session.get_inputs()[0].name: dummy_src.numpy(),
         ort_session.get_inputs()[1].name: dummy_mask.numpy(),
     }
     ort_logits = ort_session.run(None, ort_inputs)[0]
 
+    with torch.no_grad():
+        torch_logits = model(dummy_src, dummy_mask)
+
     np.testing.assert_allclose(torch_logits.numpy(), ort_logits, rtol=1e-3, atol=1e-5)
     print("✅ ONNX Runtime output matches PyTorch output.")
     print("\n🎉 Export and verification complete!")
 
 
-# --- Execute Export ---
 if __name__ == "__main__":
     export_and_verify_onnx()

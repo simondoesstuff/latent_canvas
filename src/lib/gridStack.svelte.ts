@@ -1,3 +1,4 @@
+import { Momento } from './momento';
 import type { Coord, int } from './utils';
 
 export class GridStack {
@@ -57,5 +58,20 @@ export class GridStack {
 
 	public getCoordSeq(): Array<Coord> {
 		return [...this._diffs];
+	}
+
+	// this is where the momento pattern is implemented
+
+	public restoreMomento(momento: Momento) {
+		const diffs = momento.asDiffs();
+		this.clear();
+
+		for (const diff of diffs) {
+			this.push(...diff);
+		}
+	}
+
+	public createMomento() {
+		return Momento.fromDiffs(this._diffs);
 	}
 }
